@@ -16,6 +16,14 @@ SParseError CLuaConfigString::parse(lua_State* s) {
 
     std::string str = lua_tostring(s, -1);
 
+    // an empty string means the default. Where the default is empty as well, keep the
+    // string as given: rule fields like a monitor's mirror read it without the marker.
+    if (str.empty()) {
+        m_data       = m_default == STRVAL_EMPTY ? "" : m_default;
+        m_bSetByUser = true;
+        return {.errorCode = PARSE_ERROR_OK};
+    }
+
     if (m_validator) {
         auto res = m_validator(str);
         if (!res)
